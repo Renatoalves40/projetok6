@@ -15,7 +15,7 @@ jobs:
         with: 
           filename: scripts/aula31.js
 
-      - run: ls & mkdir report & mv index.html report
+      - run: ls && mkdir report && mv index.html report   # Verifica se index.html é gerado
       
       - name: step 3 - upload artifact
         uses: actions/upload-artifact@v4
