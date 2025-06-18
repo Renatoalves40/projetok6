@@ -1,19 +1,25 @@
 name: K6 load test
+
 on: [push]
+
 permissions:
   contents: write
+
 jobs:
-  build: 
+  build:
     name: K6 load test
+
     runs-on: ubuntu-latest
+
     steps:
       - name: Step 1 - Checkout
         uses: actions/checkout@v4
 
       - name: Step 2 - Run k6 Load Test
         uses: grafana/k6-action@v0.2.0
-        with: 
-          filename: scripts/aula31.js  # Ajuste para o caminho correto se necessário
+        with:
+          filename: aula31.js  # Usando o caminho correto para o script na raiz
+
       - name: Verify test file exists
         run: |
           if [ -f aula31.js ]; then
@@ -21,23 +27,28 @@ jobs:
           else
             echo "Test file not found: aula31.js"
             exit 1
-          fi
         shell: bash
 
       - name: Run K6 Script with Web Dashboard and handleSummary
         run: |
           mkdir -p logs
           echo "Iniciando a execução do K6 com Dashboard e Relatório HTML..."
+
           # Definindo as variáveis de ambiente para o Dashboard do K6
           export K6_WEB_DASHBOARD=true
           export K6_WEB_DASHBOARD_EXPORT=report.html
+
           # Executa o script K6 com o handleSummary e as variáveis definidas
-          k6 run --vus 2 --duration 30s --out json=output.json ./aula31.js | tee logs/k6_test.log
+          k6 run --vus 2 --duration 30s --out json=output.json aula31.js | tee logs/k6_test.log
+
           echo "Execução do K6 finalizada."
+
           # Geração do segundo relatório via handleSummary
           echo "Gerando o relatório HTML via handleSummary..."
-          k6 run --out json=output.json --summary-trend-stats "avg,p(90),p(95),max" ./VidaAP.js | tee logs/k6_test.log
+          k6 run --out json=output.json --summary-trend-stats "avg,p(90),p(95),max" aula31.js | tee logs/k6_test.log
+
           echo "Ambos os relatórios foram gerados."
+
       - name: Step 3 - Create Report Directory
         run: |
           mkdir -p report
@@ -45,13 +56,14 @@ jobs:
 
       - name: Step 4 - Upload Artifact
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: relatorio de testes de performance
           path: report
-      
+
       - name: Step 5 - Publish Report
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: report
+
