@@ -16,12 +16,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Step 2 - Run k6 Load Test
-        uses: grafana/k6-action@v0.2.0
-        with:
-          filename: aula31.js  # Usando o caminho correto para o script na raiz
-
-    
-      - name: Run K6 Script with Web Dashboard and handleSummary
         run: |
           mkdir -p logs
           echo "Iniciando a execução do K6 com Dashboard e Relatório HTML..."
@@ -30,27 +24,29 @@ jobs:
           export K6_WEB_DASHBOARD=true
           export K6_WEB_DASHBOARD_EXPORT=report.html
 
-          # Executa o script K6 com o handleSummary e as variáveis definidas
+          # Executa o script K6 com o handleSummary e redireciona logs
           k6 run --vus 2 --duration 30s --out json=output.json aula31.js | tee logs/k6_test.log
 
           echo "Execução do K6 finalizada."
 
-          # Geração do segundo relatório via handleSummary
+          # Gera o relatório HTML via handleSummary
           echo "Gerando o relatório HTML via handleSummary..."
-          k6 run --out json=output.json --summary-trend-stats "avg,p(90),p(95),max" aula31.js | tee logs/k6_test.log
+          k6 run --out json=output.json --summary-trend-stats "avg,p(90),p(95),max" aula31.js | tee -a logs/k6_test.log
 
           echo "Ambos os relatórios foram gerados."
 
       - name: Step 3 - Create Report Directory
         run: |
           mkdir -p report
-          mv index.html report || echo "index.html not found"  # Move o relatório gerado ou exibe mensagem
+          mv report.html report || echo "report.html not found"  # Move o relatório HTML gerado ou exibe mensagem
+          mv output.json report || echo "output.json not found"  # Move o arquivo JSON de saída para o diretório de relatório
+          mv logs/k6_test.log report || echo "k6_test.log not found"  # Move os logs para o diretório de relatório
 
-      - name: Step 4 - Upload Artifact
+      - name: Step 4 - Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: relatorio de testes de performance
-          path: report
+          path: report  # Agora inclui todos os arquivos gerados (report.html, output.json e k6_test.log)
 
       - name: Step 5 - Publish Report
         uses: peaceiris/actions-gh-pages@v4
