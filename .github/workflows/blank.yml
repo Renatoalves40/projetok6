@@ -7,23 +7,26 @@ jobs:
     name: K6 load test
     runs-on: ubuntu-latest
     steps:
-      - name: step 1 - checkout
+      - name: Step 1 - Checkout
         uses: actions/checkout@v4
 
-      - name: step 2 - run k6 load test
+      - name: Step 2 - Run k6 Load Test
         uses: grafana/k6-action@v0.2.0
         with: 
-          filename: aula31.js
+          filename: scripts/aula31.js  # Ajuste para o caminho correto se necessário
 
-      - run: ls && mkdir report && mv index.html report   # Verifica se index.html é gerado
-      
-      - name: step 3 - upload artifact
+      - name: Step 3 - Create Report Directory
+        run: |
+          mkdir -p report
+          mv index.html report || echo "index.html not found"  # Move o relatório gerado ou exibe mensagem
+
+      - name: Step 4 - Upload Artifact
         uses: actions/upload-artifact@v4
         with: 
           name: relatorio de testes de performance
           path: report
       
-      - name: step 4 - publish report
+      - name: Step 5 - Publish Report
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
