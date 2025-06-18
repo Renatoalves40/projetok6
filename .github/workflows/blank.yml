@@ -20,15 +20,7 @@ jobs:
         with:
           filename: aula31.js  # Usando o caminho correto para o script na raiz
 
-      - name: Verify test file exists
-        run: |
-          if [ -f aula31.js ]; then
-            echo "Test file found: aula31.js"
-          else
-            echo "Test file not found: aula31.js"
-            exit 1
-        shell: bash
-
+    
       - name: Run K6 Script with Web Dashboard and handleSummary
         run: |
           mkdir -p logs
